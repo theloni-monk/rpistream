@@ -20,13 +20,22 @@ class Server:
         atexit.register(self.close)
 
     def serve(self):
+        """Find client"""
         while True:
             self.conn, self.clientAddr = self.s.accept()
             if self.verbose:
                 print('Connected with ' + self.clientAddr[0] + ':' + str(self.clientAddr[1]))
-            return
+            return None
                 
     def startStream(self,getFrame,args=[]):
+        """ Creates videostream, calls getFrame to recieve new frames
+        Args:
+            getFrame: Function executed to generate image frame 
+            args: the argumetns passed to the getFrame function
+
+        Returns:
+            void
+        """
         #send initial frame
         Sfile=io.BytesIO()
         C=zstandard.ZstdCompressor()
@@ -51,11 +60,12 @@ class Server:
             #print("Sent {}KB".format(int(lend/1000)))
 
     def close(self):
+        """Close all connections"""
         self.s.close()
 
 def retrieveImage(cam,imgResize):
+    """Basic function for retrieving camera data, for getFrame"""
     image = cv2.resize(cam.image,(0,0),fx=0.5,fy=0.5)
-    #image = laneDetection.process(image)
     return image
 
 if __name__ == "__main__":

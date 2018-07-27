@@ -18,6 +18,7 @@ class Camera:
 
     @property
     def image(self):
+
         if not self.paused:
             ret_val, img = self.cam.read()
             if self.mirror:
@@ -28,6 +29,7 @@ class Camera:
 
     @property
     def imageNoDistort(self):
+        
         img = self.image
 
         K = np.array([[1.34747452e+03, 0., 1.28368878e+03],
