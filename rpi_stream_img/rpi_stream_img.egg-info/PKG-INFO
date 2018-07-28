@@ -1,0 +1,43 @@
+Metadata-Version: 2.1
+Name: rpi-stream-img
+Version: 0.0.1
+Summary: A very simple library built for streaming video from a remote Raspberry Pi server in realtime.
+Home-page: https://github.com/thatguy1234510/rpi_stream_img
+Author: Theo Cooper and Ian Huang
+Author-email: theoac2009@outlook.com
+License: UNKNOWN
+Description: # RaspiCameraLivestream
+        
+        ### A very simple library built for streaming video from a remote Raspberry Pi server in realtime.
+        ---
+        ## Examples:
+        
+        ### Streaming from a webcam
+        Server
+        ```python
+        import camera
+        from streamserver import *
+        
+        def retrieveImage(cam,imgResize):
+            image = cv2.resize(cam.image,(0,0),fx=imgResize,fy=imgResize)
+            return image
+        
+        cam = camera.Camera(mirror=True)
+        scale=0.5
+        server = Server(port=5000)
+        server.serve() # Blocking; waits for a connection before continuing
+        server.startStream(retrieveImage,[cam,scale]) # Calls retrieveImage(*args) every frame  
+        ```
+        Client
+        ```python
+        from streamclient import *
+        
+        client = Client(serverIp="localhost", WriteFile=True) # Connects to the server
+        client.startStream() # Starts recieving data and displaying the video
+         ```
+         
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown

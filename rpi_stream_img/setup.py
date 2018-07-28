@@ -1,6 +1,6 @@
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("../README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
@@ -8,10 +8,10 @@ setuptools.setup(
     version="0.0.1",
     author="Theo Cooper and Ian Huang",
     author_email="theoac2009@outlook.com",
-    description="A very simple library built for streaming video from a remote Raspberry Pi server in realtime."
+    description="A very simple library built for streaming video from a remote Raspberry Pi server in realtime.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pypa/sampleproject",
+    url="https://github.com/thatguy1234510/rpi_stream_img",
     packages=setuptools.find_packages(),
     classifiers=(
         "Programming Language :: Python :: 3",
