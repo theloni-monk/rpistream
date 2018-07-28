@@ -29,7 +29,7 @@ class Camera:
 
     @property
     def imageNoDistort(self):
-        
+
         img = self.image
 
         K = np.array([[1.34747452e+03, 0., 1.28368878e+03],
@@ -43,6 +43,7 @@ class Camera:
         Knew[(0, 1), (0, 1)] = 0.4157401081053996 * Knew[(0, 1), (0, 1)]
         imgnew = cv2.undistort(img, K, D, Knew)
         return imgnew
+
 
 if __name__ == "__main__":
     cam = Camera(mirror=True)

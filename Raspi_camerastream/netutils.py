@@ -1,6 +1,7 @@
 import socket
 import struct
 
+
 def send_msg(sock, msg):
     """ Prefix each message with a 4-byte length (network byte order)
 
@@ -13,6 +14,7 @@ def send_msg(sock, msg):
     """
     msg = struct.pack('>I', len(msg)) + msg
     sock.sendall(msg)
+
 
 def recv_msg(sock):
     """ Unpacks message lengtion and stores it as an int
@@ -32,12 +34,13 @@ def recv_msg(sock):
     # Read the message data
     return recvall(sock, msglen)
 
+
 def recvall(sock, n):
     """ Helper function to recv n bytes or return None if EOF is hit 
     Args:
         sock: socket to expect data from
         n: length of data
-    
+
     Returns:
         void
         None on EOF 

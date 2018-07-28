@@ -11,7 +11,7 @@ from netutils import *
 class Client:
 
     def __init__(self, **kwargs):
-        #output file seems to be corrupted: likely due to output file stream not being closed correctly
+        # output file seems to be corrupted: likely due to output file stream not being closed correctly
         self.Write = kwargs.get("WriteFile", False)
         self.writepath = kwargs.get("path", "")
         self.FileFPS = kwargs.get("fileoutFps", 10)
@@ -26,7 +26,7 @@ class Client:
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.connect((self.ip, kwargs.get("port", 8080)))
         self.D = zstandard.ZstdDecompressor()
-        self.viewScale = kwargs.get("viewScale",1)
+        self.viewScale = kwargs.get("viewScale", 1)
         atexit.register(self.close)
 
     def recv(self, size=1024):
@@ -59,7 +59,8 @@ class Client:
 
             # load decompressed image
             try:  # diff+prevframe
-                img = (np.load(io.BytesIO(self.D.decompress(r))) + prevFrame).astype("uint8")
+                img = (np.load(io.BytesIO(self.D.decompress(r))) +
+                       prevFrame).astype("uint8")
 
             except Exception as e:
                 print(e)
@@ -69,7 +70,8 @@ class Client:
                 self.out.write(img)
 
             # show it scaled up
-            cv2.imshow("feed", cv2.resize(img, (0, 0), fx=self.viewScale, fy=self.viewScale))
+            cv2.imshow("feed", cv2.resize(
+                img, (0, 0), fx=self.viewScale, fy=self.viewScale))
             if cv2.waitKey(1) == 27:
                 break  # esc to quit
 
