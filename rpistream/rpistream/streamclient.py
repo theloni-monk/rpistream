@@ -90,5 +90,5 @@ class Client:
 
 
 if __name__ == "__main__":
-    client = Client(serverIp="localhost", WriteFile=True)
+    client = Client(serverIp="18.111.87.85", port=5000)
     client.startStream()
