@@ -24,8 +24,8 @@ class Client:
         self.ip = kwargs.get("serverIp", "18.111.87.85")
         self.s = socket.socket()
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.s.connect((self.ip, kwargs.get("port", 444)))
         self.D = zstandard.ZstdDecompressor()
+        self.viewScale = kwargs.get("viewScale",1)
         atexit.register(self.close)
 
     def recv(self, size=1024):
@@ -68,7 +68,10 @@ class Client:
                 self.out.write(img)
 
             # show it scaled up
+<<<<<<< HEAD
             cv2.imshow("feed", cv2.resize(img, (0, 0), fx=self.resize, fy=self.resize))
+=======
+>>>>>>> 5f06692bc62dcee20d773aa9ed6772012b57f5b4
             if cv2.waitKey(1) == 27:
                 break  # esc to quit
 
@@ -80,7 +83,10 @@ class Client:
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     ianIp = "10.189.81.154"
     rasPiIp = "18.111.87.85"
     client = Client(serverIp=rasPiIp, WriteFile=True, resize_cof=1.5, port=5000)
+=======
+>>>>>>> 5f06692bc62dcee20d773aa9ed6772012b57f5b4
     client.startStream()
