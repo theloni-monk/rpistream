@@ -5,7 +5,7 @@ import cv2
 # zstd might work on other computers but only zstandard will work with mine
 import zstandard
 import atexit
-from netutils import *
+from rpistream.netutils import *
 
 
 class Client:
