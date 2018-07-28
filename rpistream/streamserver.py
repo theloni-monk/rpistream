@@ -1,12 +1,12 @@
 import socket
 import cv2
-import camera
+import rpistream.camera
 import io
 import numpy as np
 from tempfile import TemporaryFile
 import zstandard
 import atexit
-from netutils import *
+from rpistream.netutils import *
 
 
 class Server:
