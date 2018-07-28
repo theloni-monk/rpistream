@@ -18,14 +18,15 @@ class Server:
         self.s = s
         self.verbose = kwargs.get("verbose", True)
         atexit.register(self.close)
-
+    def log(self,m):
+        if self.verbose:
+            print(m)
     def serve(self):
         """Find client"""
+        self.log("Searching for client...")
         while True:
             self.conn, self.clientAddr = self.s.accept()
-            if self.verbose:
-                print('Connected with ' +
-                      self.clientAddr[0] + ':' + str(self.clientAddr[1]))
+            self.log('Connected with ' + self.clientAddr[0] + ':' + str(self.clientAddr[1]))
             return None
 
     def startStream(self, getFrame, args=[]):
@@ -43,7 +44,7 @@ class Server:
         prevFrame = getFrame(*args)
         np.save(Sfile, prevFrame)
         send_msg(self.conn, C.compress(Sfile.getvalue()))
-
+        frameno = 0
         while True:
             Tfile = io.BytesIO()
             # fetch the image
@@ -58,8 +59,8 @@ class Server:
             prevFrame = img
             # send it
             send_msg(self.conn, b)
-            #print("Sent {}KB".format(int(lend/1000)))
-
+            self.log("Sent {}KB (frame {})".format(int(lend/1000),frameno))
+            frameno+=1
     def close(self):
         """Close all connections"""
         self.s.close()

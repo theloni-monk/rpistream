@@ -11,6 +11,8 @@ from netutils import *
 class Client:
 
     def __init__(self, **kwargs):
+        self.verbose = kwargs.get("verbose", True)
+
         # output file seems to be corrupted: likely due to output file stream not being closed correctly
         self.Write = kwargs.get("WriteFile", False)
         self.writepath = kwargs.get("path", "")
@@ -20,14 +22,19 @@ class Client:
         self.viewScale = kwawrgs.get("viewscale", 1.0)
         self.out = cv2.VideoWriter(
             self.writepath+self.FileName+'.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), self.FileFPS, self.iRes)
-
-        self.ip = kwargs.get("serverIp", "18.111.87.85")
+        self.log("Initializing socket...")
+        self.ip = kwargs.get("serverIp", "localhost")
         self.s = socket.socket()
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.log("Connecting...")
         self.s.connect((self.ip, kwargs.get("port", 8080)))
         self.D = zstandard.ZstdDecompressor()
         self.viewScale = kwargs.get("viewScale", 1)
         atexit.register(self.close)
+        self.log("Ready")
+    def log(self, m):
+        if self.verbose:
+            print(m)
 
     def recv(self, size=1024):
         """Recieves a single frame
