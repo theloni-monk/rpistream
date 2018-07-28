@@ -1,4 +1,4 @@
-name="rpi_stream_img"
+name="rpi-stream-img"
 import netutils
 import camera
 import streamclient

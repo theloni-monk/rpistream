@@ -2,7 +2,7 @@ Metadata-Version: 2.1
 Name: rpi-stream-img
 Version: 0.0.1
 Summary: A very simple library built for streaming video from a remote Raspberry Pi server in realtime.
-Home-page: https://github.com/thatguy1234510/rpi_stream_img
+Home-page: https://github.com/thatguy1234510/rpi-stream-img
 Author: Theo Cooper and Ian Huang
 Author-email: theoac2009@outlook.com
 License: UNKNOWN

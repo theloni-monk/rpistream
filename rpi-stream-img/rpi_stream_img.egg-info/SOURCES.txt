@@ -1,5 +1,5 @@
 setup.py
-rpi_stream_img/__init__.py
+rpi-stream-img/__init__.py
 rpi_stream_img.egg-info/PKG-INFO
 rpi_stream_img.egg-info/SOURCES.txt
 rpi_stream_img.egg-info/dependency_links.txt
