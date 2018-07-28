@@ -7,13 +7,12 @@ from tempfile import TemporaryFile
 import zstandard
 import atexit
 from netutils import *
-import laneDetection
 
 class Server:
     def __init__(self,**kwargs):
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind(('', kwargs.get("port",5000)))
+        s.bind((kwargs.get("bindto",""), kwargs.get("port",8080)))
         s.listen(10)
         self.s = s
         self.verbose = kwargs.get("verbose",True)
