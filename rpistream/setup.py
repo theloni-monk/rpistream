@@ -5,7 +5,7 @@ import setuptools
 
 setuptools.setup(
     name="rpistream",
-    version="0.0.4",
+    version="0.0.6",
     author="Theo Cooper and Ian Huang",
     author_email="theoac2009@outlook.com",
     description="A very simple library built for streaming video from a remote Raspberry Pi server in realtime.",

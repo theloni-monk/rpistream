@@ -1,6 +1,5 @@
 name="rpistream"
-#import netutils
-#import camera
-#import streamclient
-#import streamserver
-#ian told me to do this
+import rpistream.camera as camera
+import rpistream.netutils as netutils
+import rpistream.streamclient as streamclient
+import rpistream.streamserver as streamserver

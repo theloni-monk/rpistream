@@ -12,7 +12,6 @@ class Client:
 
     def __init__(self, **kwargs):
         self.verbose = kwargs.get("verbose", True)
-
         # output file seems to be corrupted: likely due to output file stream not being closed correctly
         self.Write = kwargs.get("WriteFile", False)
         self.writepath = kwargs.get("path", "")
