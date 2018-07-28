@@ -59,7 +59,7 @@ class Server:
             prevFrame = img
             # send it
             send_msg(self.conn, b)
-            self.log("Sent {}KB (frame {})".format(int(lend/1000),frameno))
+            self.log("Sent {}KB (frame {})".format(int(len(b)/1000),frameno))
             frameno+=1
     def close(self):
         """Close all connections"""

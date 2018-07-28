@@ -19,7 +19,7 @@ class Client:
         self.FileFPS = kwargs.get("fileoutFps", 10)
         self.FileName = kwargs.get("fileName", 'outpy')
         self.iRes = kwargs.get("imageResolution", (1280, 960))
-        self.viewScale = kwawrgs.get("viewscale", 1.0)
+        self.viewScale = kwargs.get("viewscale", 1.0)
         self.out = cv2.VideoWriter(
             self.writepath+self.FileName+'.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), self.FileFPS, self.iRes)
         self.log("Initializing socket...")
