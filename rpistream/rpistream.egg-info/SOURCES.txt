@@ -1,5 +1,0 @@
-setup.py
-rpistream.egg-info/PKG-INFO
-rpistream.egg-info/SOURCES.txt
-rpistream.egg-info/dependency_links.txt
-rpistream.egg-info/top_level.txt
