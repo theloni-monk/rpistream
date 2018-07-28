@@ -2,6 +2,7 @@
 
 ### A very simple library built for streaming video from a remote Raspberry Pi server in realtime.
 
+
 ---
 
 ## How to install:
@@ -53,3 +54,6 @@ from rpistream.streamclient import Client
 client = Client(serverIp="localhost", WriteFile=True) # Connects to the server
 client.startStream() # Starts recieving data and displaying the video
 ```
+---
+## Dependecies:
+- zstandard
