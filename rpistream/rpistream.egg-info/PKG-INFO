@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: rpistream
+Version: 0.0.3
+Summary: A very simple library built for streaming video from a remote Raspberry Pi server in realtime.
+Home-page: https://github.com/thatguy1234510/rpistream
+Author: Theo Cooper and Ian Huang
+Author-email: theoac2009@outlook.com
+License: UNKNOWN
+Description: foo
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown

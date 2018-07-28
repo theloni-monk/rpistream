@@ -1,0 +1,10 @@
+setup.py
+rpistream/__init__.py
+rpistream/camera.py
+rpistream/netutils.py
+rpistream/streamclient.py
+rpistream/streamserver.py
+rpistream.egg-info/PKG-INFO
+rpistream.egg-info/SOURCES.txt
+rpistream.egg-info/dependency_links.txt
+rpistream.egg-info/top_level.txt
