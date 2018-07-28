@@ -6,7 +6,10 @@
 
 ### Streaming from a webcam
 Server
- ```python
+```python
+import camera
+from streamserver import *
+
 def retrieveImage(cam,imgResize):
     image = cv2.resize(cam.image,(0,0),fx=imgResize,fy=imgResize)
     return image
@@ -19,6 +22,8 @@ server.startStream(retrieveImage,[cam,scale]) # Calls retrieveImage(*args) every
 ```
 Client
 ```python
+from streamclient import *
+
 client = Client(serverIp="localhost", WriteFile=True) # Connects to the server
 client.startStream() # Starts recieving data and displaying the video
  ```
