@@ -17,7 +17,7 @@ class Client:
         self.FileFPS = kwargs.get("fileoutFps", 10)
         self.FileName = kwargs.get("fileName", 'outpy')
         self.iRes = kwargs.get("imageResolution", (1280, 960))
-        self.resize = kwawrgs.get("resize_cof", 1.0)
+        self.viewScale = kwawrgs.get("viewscale", 1.0)
         self.out = cv2.VideoWriter(
             self.writepath+self.FileName+'.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), self.FileFPS, self.iRes)
 
@@ -69,11 +69,7 @@ class Client:
                 self.out.write(img)
 
             # show it scaled up
-<<<<<<< HEAD
-            cv2.imshow("feed", cv2.resize(img, (0, 0), fx=self.resize, fy=self.resize))
-=======
             cv2.imshow("feed", cv2.resize(img, (0, 0), fx=self.viewScale, fy=self.viewScale))
->>>>>>> 5f06692bc62dcee20d773aa9ed6772012b57f5b4
             if cv2.waitKey(1) == 27:
                 break  # esc to quit
 
@@ -85,11 +81,5 @@ class Client:
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-    ianIp = "10.189.81.154"
-    rasPiIp = "18.111.87.85"
-    client = Client(serverIp=rasPiIp, WriteFile=True, resize_cof=1.5, port=5000)
-=======
     client = Client(serverIp="localhost", WriteFile=True)
->>>>>>> 5f06692bc62dcee20d773aa9ed6772012b57f5b4
     client.startStream()
