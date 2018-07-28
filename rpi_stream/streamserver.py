@@ -64,12 +64,12 @@ class Server:
 
 def retrieveImage(cam,imgResize):
     """Basic function for retrieving camera data, for getFrame"""
-    image = cv2.resize(cam.image,(0,0),fx=0.5,fy=0.5)
+    image = cv2.resize(cam.image,(0,0),fx=imgResize,fy=imgResize)
     return image
 
 if __name__ == "__main__":
     cam = camera.Camera(mirror=True)
-    resize_cof=0.5 # 480p
+    resize_cof=1 # 960p
     server = Server(port=5000)
     server.serve()
     server.startStream(retrieveImage,[cam,resize_cof])
