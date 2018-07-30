@@ -6,7 +6,8 @@ from multiprocessing import Process, Pipe
 class Camera:
     def __init__(self, **kwargs):
         self.mirror = kwargs.get("mirror", False)
-        self.cam = cv2.VideoCapture(kwargs.get("device", 0))
+        self.cam = cv2.VideoCapture(kwargs.get("device", 0)) #captures from the first webcam it sees by default
+        
         self.output = None
         self.paused = False
 
