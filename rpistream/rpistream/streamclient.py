@@ -2,14 +2,12 @@ import socket
 import numpy as np
 import io
 import cv2
-# zstd might work on other computers but only zstandard will work with mine
-import zstandard
+import zstandard # zstd might work on other computers but only zstandard will work with mine
 import atexit
 from rpistream.netutils import *
 
 
 class Client:
-
     def __init__(self, **kwargs):
         self.verbose = kwargs.get("verbose", True)
         # output file seems to be corrupted: likely due to output file stream not being closed correctly
