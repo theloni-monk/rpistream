@@ -74,5 +74,6 @@ setuptools.setup(
     ),
     install_requires=[
         'zstandard',
+        'opencv-python'
     ]
 )

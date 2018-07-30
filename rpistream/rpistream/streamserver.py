@@ -74,7 +74,7 @@ def retrieveImage(cam, imgResize):
 
 
 if __name__ == "__main__":
-    cam = camera.Camera(mirror=True)
+    cam = rpistream.camera.Camera(mirror=True)
     resize_cof = 1  # 960p
     server = Server(port=5000)
     server.serve()
