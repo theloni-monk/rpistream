@@ -20,18 +20,52 @@ class Server:
         self.verbose = kwargs.get("verbose", True)
         atexit.register(self.close)
         print("Server ready")
-    
-    def log(self,m):
+
+    def log(self, m):
         if self.verbose:
-            print(m) #printout if verbose
+            print(m)  # printout if verbose
 
     def serve(self):
         """Find client"""
         self.log("Searching for client...")
         while True:
-            self.conn, self.clientAddr = self.s.accept() #wait for client to query the server for a connection
-            self.log('Connected to ' + self.clientAddr[0] + ':' + str(self.clientAddr[1]))
-            return None #only connects to one client 
+            # wait for client to query the server for a connection
+            self.conn, self.clientAddr = self.s.accept()
+            self.log('Connected to ' +
+                     self.clientAddr[0] + ':' + str(self.clientAddr[1]))
+            return None  # only connects to one client
+
+    def initializeStream(self, getFrame, args=[]):
+        self.Sfile = io.BytesIO()
+        self.C = zstandard.ZstdCompressor()
+        self.prevFrame = getFrame(*args)
+        np.save(self.Sfile, self.prevFrame)
+        send_msg(self.conn, self.C.compress(self.Sfile.getvalue()))
+        self.frameno = 0
+
+    def sendSingleFrame(self, img):
+        # instanciate temporary bytearray to send later
+        Tfile = io.BytesIO()
+
+        # fetch the image
+        self.log("Fetching frame...")
+
+        # use numpys built in save function to diff with prevframe
+        # because we diff it it will compress more
+        np.save(Tfile, img-self.prevFrame)
+
+        # compress it into even less bytes
+        b = self.C.compress(Tfile.getvalue())
+
+        # saving prev frame
+        self.prevFrame = img
+
+        # send it
+        send_msg(self.conn, b)
+        if self.verbose:
+            self.log("Sent {}KB (frame {})".format(
+                int(len(b)/1000), self.frameno))  # debugging
+            self.frameno += 1
 
     def startStream(self, getFrame, args=[]):
         """ Creates videostream, calls getFrame to recieve new frames
@@ -43,48 +77,22 @@ class Server:
             void
         """
         # send initial frame of intra-frame compression
-        Sfile = io.BytesIO()
-        C = zstandard.ZstdCompressor()
-        prevFrame = getFrame(*args)
-        np.save(Sfile, prevFrame)
-        send_msg(self.conn, C.compress(Sfile.getvalue()))
+        self.initializeStream(getFrame, args)
 
-        frameno = 0
         while True:
-            #instanciate temporary bytearray to send later
-            Tfile = io.BytesIO()
-
-            # fetch the image
-            self.log("Fetching frame...")
-            img = getFrame(*args)
-            
-            # use numpys built in save function to diff with prevframe
-            # because we diff it it will compress more
-            np.save(Tfile, img-prevFrame)
-
-            # compress it into even less bytes
-            b = C.compress(Tfile.getvalue())
-
-            # saving prev frame
-            prevFrame = img
-
-            # send it
-            send_msg(self.conn, b)
-            if self.verbose:
-                self.log("Sent {}KB (frame {})".format(int(len(b)/1000),frameno)) #debugging
-                frameno+=1
+            self.sendSingleFrame()
 
     def close(self):
         """Close all connections"""
         self.s.close()
 
 
-
-#this a helper for the __main__ func
+# this a helper for the __main__ func
 def retrieveImage(cam, imgResize):
     """Basic function for retrieving camera data, for getFrame"""
     image = cv2.resize(cam.image, (0, 0), fx=imgResize, fy=imgResize)
     return image
+
 
 # runs if you directly run this file
 if __name__ == "__main__":
