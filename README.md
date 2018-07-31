@@ -51,7 +51,7 @@ Client
 ```python
 from rpistream.streamclient import Client
 
-client = Client(serverIp="localhost", WriteFile=True) # Connects to the server
+client = Client(serverIp="localhost", port = 5000) # Connects to the server
 client.startStream() # Starts recieving data and displaying the video
 ```
 ---

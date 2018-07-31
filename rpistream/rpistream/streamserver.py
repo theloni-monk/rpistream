@@ -35,7 +35,16 @@ class Server:
                      self.clientAddr[0] + ':' + str(self.clientAddr[1]))
             return None  # only connects to one client
 
+    def serveNoBlock(self):
+        """Find client"""
+        self.log("Searching for client...")
+        self.s.setblocking(0)
+        self.conn, self.clientAddr = self.s.accept() #wait for client to query the server for a connection
+        self.log('Connected to ' + self.clientAddr[0] + ':' + str(self.clientAddr[1]))
+        return None #only connects to one client 
+
     def initializeStream(self, getFrame, args=[]):
+        # send initial frame of intra-frame compression
         self.Sfile = io.BytesIO()
         self.C = zstandard.ZstdCompressor()
         self.prevFrame = getFrame(*args)
@@ -43,7 +52,7 @@ class Server:
         send_msg(self.conn, self.C.compress(self.Sfile.getvalue()))
         self.frameno = 0
 
-    def sendSingleFrame(self, img):
+    def sendFrame(self, img, diff=True):
         # instanciate temporary bytearray to send later
         Tfile = io.BytesIO()
 
@@ -62,10 +71,12 @@ class Server:
 
         # send it
         send_msg(self.conn, b)
+        
         if self.verbose:
             self.log("Sent {}KB (frame {})".format(
                 int(len(b)/1000), self.frameno))  # debugging
             self.frameno += 1
+            self.frameno%=60
 
     def startStream(self, getFrame, args=[]):
         """ Creates videostream, calls getFrame to recieve new frames
@@ -76,11 +87,9 @@ class Server:
         Returns:
             void
         """
-        # send initial frame of intra-frame compression
         self.initializeStream(getFrame, args)
-
         while True:
-            self.sendSingleFrame()
+            self.sendFrame(getFrame, args)
 
     def close(self):
         """Close all connections"""
