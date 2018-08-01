@@ -11,7 +11,6 @@ from rpistream.netutils import *
 
 class Server:
     def __init__(self, **kwargs):
-
         self.verbose = kwargs.get("verbose", False)
         # output file seems to be corrupted: likely due to output file stream not being closed correctly
         self.Write = kwargs.get("WriteFile", False)
@@ -40,6 +39,7 @@ class Server:
         print("Server ready")
 
     def log(self, m):
+        """Prints out if verbose"""
         if self.verbose:
             print(m)  # printout if verbose
 
@@ -54,7 +54,7 @@ class Server:
             return None  # only connects to one client
 
     def serveNoBlock(self):
-        """Find client"""
+        """Find client without blocking"""
         self.log("Searching for client...")
         self.s.setblocking(0)
         self.conn, self.clientAddr = self.s.accept() #wait for client to query the server for a connection
@@ -62,7 +62,7 @@ class Server:
         return None #only connects to one client 
 
     def initializeStream(self, img):
-        # send initial frame of intra-frame compression
+        """Sends initial frame of intra-frame compression and preps"""
         self.Sfile = io.BytesIO()
         self.C = zstandard.ZstdCompressor()
         self.prevFrame = img
@@ -71,9 +71,11 @@ class Server:
         self.frameno = 0
 
     def fetchFrame(self, getFrame, args=[]):
+        """Fetches a frame given a function"""
         return getFrame(*args)
 
     def sendFrame(self, img):
+        """Sends single frame with intra-frame compression over an initialized stream"""
         if img==None:
             self.close(Exception("sendFrame given null img"))
 
@@ -103,7 +105,7 @@ class Server:
         self.frameno += 1
 
     def startStream(self, getFrame, args=[]):
-        """ Creates videostream, calls getFrame to recieve new frames
+        """ Creates videostream, calls getFrame to recieve new frames, blocking
         Args:
             getFrame: Function executed to generate image frame 
             args: the argumetns passed to the getFrame function
@@ -116,7 +118,7 @@ class Server:
             self.sendFrame(self.fetchFrame(getFrame, args))
 
     def close(self, E=None):
-        """Closes socket and opencv instances"""
+        """Closes socket"""
         if self.Write:
             self.out.release()
         self.s.close()

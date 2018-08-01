@@ -5,13 +5,19 @@ import cv2
 import zstandard 
 import atexit
 from rpistream.netutils import *
-#TODO: only import if on windows, if on other system import other lib
-import win32gui # only works for windows
+#TODO: add libraries for other GUIs
+import platform
+if platform.system() == 'Windows':
+    import win32gui # only works for windows
+elif platform.system() == 'Linux':
+    pass
+elif platform.system() == 'Darwin':
+    pass
 
 
 class Client:
     def __init__(self, **kwargs):
-        self.os=kwargs.get("OS","windows")
+        self.os=platform.system()
         self.verbose = kwargs.get("verbose", False)
         # output file seems to be corrupted: likely due to output file stream not being closed correctly
         self.Write = kwargs.get("WriteFile", False)
@@ -56,6 +62,7 @@ class Client:
         self.log("Ready")
 
     def log(self, m):
+        """prints out if verbose"""
         if self.verbose:
             print(m)  # printout if server is in verbose mode
 
@@ -77,6 +84,7 @@ class Client:
                 return data
 
     def initializeStream(self):
+        """Recvs initial frame and preps"""
         img = np.zeros((3, 3))  # make blank img
         # initial frame cant use intra-frame compression
         self.prevFrame = np.load(io.BytesIO(
@@ -85,6 +93,7 @@ class Client:
         self.log("stream initialized")
 
     def decodeFrame(self):
+        """Decodes single frame of data from an initialized stream"""
         try:
             r = recv_msg(self.s)  # gets the frame difference
         except Exception as e:
@@ -119,9 +128,9 @@ class Client:
             img=self.decodeFrame() #decode frame
             
             #TODO: add other OSs
-            if(self.os=="windows"):
-                #gets the window and calls callback: which gets the window size and sets it as an attribute
-                win32gui.EnumWindows(self.callback, None) 
+            if(self.os=="Windows"):
+                #gets the window and calls Wcallback: which gets the window size and sets it as an attribute
+                win32gui.EnumWindows(self.Wcallback, None) 
             
 
             # adjust core resolution: 
@@ -134,7 +143,8 @@ class Client:
             if cv2.waitKey(1) == 27:
                 break  # esc to quit
 
-    def callback(self, hwnd, extra):
+    def Wcallback(self, hwnd, extra):
+        """Gets window size on windoes"""
         rect = win32gui.GetWindowRect(hwnd)
         w = rect[2] - rect[0]
         h = rect[3] - rect[1]
