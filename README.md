@@ -1,7 +1,6 @@
 # RaspiCameraLivestream
 
-### A very simple library built for streaming video from a remote Raspberry Pi server in realtime.
-
+## A very simple library built for streaming video from a remote Raspberry Pi server in realtime.
 
 ---
 
@@ -54,7 +53,10 @@ from rpistream.streamclient import Client
 client = Client(serverIp="localhost", port = 5000) # Connects to the server
 client.startStream() # Starts recieving data and displaying the video
 ```
+
 ---
+
 ## Dependecies:
+
 - zstandard
-- openCv-python -but pip wont install it so its not listed
+- openCv-python -but pip won't install it so its not listed

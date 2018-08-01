@@ -1,4 +1,7 @@
 # TODOS:
-### -More non-blocking funcs
-### -Fix bugs in client and server verbose
-### -Add fast inexpencive encryption as an option
+
+## -client screen auto-resizing
+
+## -More non-blocking funcs
+
+## -Add fast inexpencive encryption as an option

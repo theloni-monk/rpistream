@@ -5,10 +5,13 @@ import cv2
 import zstandard 
 import atexit
 from rpistream.netutils import *
+#TODO: only import if on windows, if on other system import other lib
+import win32gui # only works for windows
 
 
 class Client:
     def __init__(self, **kwargs):
+        self.os=kwargs.get("OS","windows")
         self.verbose = kwargs.get("verbose", False)
         # output file seems to be corrupted: likely due to output file stream not being closed correctly
         self.Write = kwargs.get("WriteFile", False)
@@ -26,7 +29,8 @@ class Client:
             
             self.out = cv2.VideoWriter(
                 self.writepath+self.FileName+'.avi', fourcc, self.FileFPS, self.iRes)
-            
+        
+        self.windowRes = (640, 480)
         self.prevFrame = None
 
         # creates socket
@@ -112,12 +116,30 @@ class Client:
         self.initializeStream() #decode initial frame 
         
         while True:
-            img=self.decodeFrame() #decode it
-            # show it scaled up
-            cv2.imshow("feed", cv2.resize(img, (0, 0), fx=self.viewScale, fy=self.viewScale))
+            img=self.decodeFrame() #decode frame
+            
+            #TODO: add other OSs
+            if(self.os=="windows"):
+                #gets the window and calls callback: which gets the window size and sets it as an attribute
+                win32gui.EnumWindows(self.callback, None) 
+            
+
+            # adjust core resolution: 
+            # note: there isn't really a reason for viewScale to ever not be one
+            img=cv2.resize(img, (0, 0), fx=self.viewScale, fy=self.viewScale)
+            
+            #dynamically scale image size to window size
+            cv2.imshow("feed", cv2.resize(img, (0, 0), fx=self.windowRes[0]/img.shape[0], fy=self.windowRes[1]/img.shape[1]))
+            
             if cv2.waitKey(1) == 27:
                 break  # esc to quit
 
+    def callback(self, hwnd, extra):
+        rect = win32gui.GetWindowRect(hwnd)
+        w = rect[2] - rect[0]
+        h = rect[3] - rect[1]
+        self.windowRes=(w,h)
+    
     def close(self, E=None):
         """Closes socket and opencv instances"""
         self.out.release()
