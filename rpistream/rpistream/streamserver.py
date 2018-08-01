@@ -11,13 +11,31 @@ from rpistream.netutils import *
 
 class Server:
     def __init__(self, **kwargs):
+
+        self.verbose = kwargs.get("verbose", False)
+        # output file seems to be corrupted: likely due to output file stream not being closed correctly
+        self.Write = kwargs.get("WriteFile", False)
+        self.writepath = kwargs.get("path", "")
+        self.FileFPS = kwargs.get("fileoutFps", 10)
+        self.FileName = kwargs.get("fileName", 'outpy')
+        self.iRes = kwargs.get("imageResolution", (640, 480))
+        self.out=None
+        fourcc = None
+        if self.Write:
+            try:
+                fourcc = cv2.cv.CV_FOURCC(*'MJPG') # OpenCV 2 function
+            except:
+                fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')  # OpenCV 3 function
+            
+            self.out = cv2.VideoWriter(
+                self.writepath+self.FileName+'.avi', fourcc, self.FileFPS, self.iRes)
+            
         print("Initilizing socket")
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((kwargs.get("bindto", ""), kwargs.get("port", 8080)))
         s.listen(10)
         self.s = s
-        self.verbose = kwargs.get("verbose", True)
         atexit.register(self.close)
         print("Server ready")
 
@@ -43,22 +61,24 @@ class Server:
         self.log('Connected to ' + self.clientAddr[0] + ':' + str(self.clientAddr[1]))
         return None #only connects to one client 
 
-    def initializeStream(self, getFrame, args=[]):
+    def initializeStream(self, img):
         # send initial frame of intra-frame compression
         self.Sfile = io.BytesIO()
         self.C = zstandard.ZstdCompressor()
-        self.prevFrame = getFrame(*args)
+        self.prevFrame = img
         np.save(self.Sfile, self.prevFrame)
         send_msg(self.conn, self.C.compress(self.Sfile.getvalue()))
         self.frameno = 0
 
-    def sendFrame(self, img, diff=True):
+    def fetchFrame(self, getFrame, args=[]):
+        return getFrame(*args)
+
+    def sendFrame(self, img):
+        if img==None:
+            self.close(Exception("sendFrame given null img"))
+
         # instanciate temporary bytearray to send later
         Tfile = io.BytesIO()
-
-        # fetch the image
-        self.log("Fetching frame...")
-
         # use numpys built in save function to diff with prevframe
         # because we diff it it will compress more
         np.save(Tfile, img-self.prevFrame)
@@ -68,15 +88,19 @@ class Server:
 
         # saving prev frame
         self.prevFrame = img
+        if self.Write:
+            try:
+                self.out.write(img)  # save frame to a video file server side
+            except Exception as e:
+                self.close(e)
 
         # send it
-        send_msg(self.conn, b)
-        
-        if self.verbose:
-            self.log("Sent {}KB (frame {})".format(
-                int(len(b)/1000), self.frameno))  # debugging
-            self.frameno += 1
-            self.frameno%=60
+        try:
+            send_msg(self.conn, b)
+        except Exception as e:
+            self.close(e)
+        self.log("Sent {}KB (frame {})".format(int(len(b)/1000), self.frameno))  # debugging
+        self.frameno += 1
 
     def startStream(self, getFrame, args=[]):
         """ Creates videostream, calls getFrame to recieve new frames
@@ -87,13 +111,19 @@ class Server:
         Returns:
             void
         """
-        self.initializeStream(getFrame, args)
+        self.initializeStream(self.fetchFrame(getFrame, args))
         while True:
-            self.sendFrame(getFrame, args)
+            self.sendFrame(self.fetchFrame(getFrame, args))
 
-    def close(self):
-        """Close all connections"""
+    def close(self, E=None):
+        """Closes socket and opencv instances"""
+        if self.Write:
+            self.out.release()
         self.s.close()
+        if(E!=None):
+            print("Stream closed on Error\n" + E)
+        else:
+            self.log("Stream closed")
 
 
 # this a helper for the __main__ func
