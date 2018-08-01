@@ -1,5 +1,6 @@
 from rpistream.camera import Camera
 from rpistream.streamserver import Server
+import cv2
 
 def retrieveImage(cam,imgResize):
     image = cv2.resize(cam.image,(0,0),fx=imgResize,fy=imgResize)

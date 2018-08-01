@@ -5,6 +5,8 @@ import cv2
 import zstandard 
 import atexit
 from rpistream.netutils import *
+import sys
+
 #TODO: add libraries for other GUIs
 import platform
 if platform.system() == 'Windows':
@@ -37,6 +39,7 @@ class Client:
                 self.writepath+self.FileName+'.avi', fourcc, self.FileFPS, self.iRes)
         
         self.windowRes = (640, 480)
+        self.windowTitle=kwargs.get("Title","Feed")
         self.prevFrame = None
 
         # creates socket
@@ -99,8 +102,12 @@ class Client:
         except Exception as e:
             self.close(e)
 
-        if len(r) == 0:
-            pass
+        try:
+            if len(r) == 0:
+                pass
+        except Exception as e:
+            self.close(Exception("Server sent Null data"))
+        
 
         # load decompressed image
                 # np.load creates an array from the serialized data
@@ -123,45 +130,59 @@ class Client:
     def startStream(self):
         """Decodes files from stream and displays them"""  
         self.initializeStream() #decode initial frame 
-        
+        cv2.namedWindow(self.windowTitle, cv2.WINDOW_NORMAL)
+
         while True:
             img=self.decodeFrame() #decode frame
             
             #TODO: add other OSs
             if(self.os=="Windows"):
                 #gets the window and calls Wcallback: which gets the window size and sets it as an attribute
-                win32gui.EnumWindows(self.Wcallback, None) 
-            
+                try:
+                    win32gui.EnumWindows(self.Wcallback, None) 
+                except Exception:
+                    pass
+                
 
             # adjust core resolution: 
             # note: there isn't really a reason for viewScale to ever not be one
             img=cv2.resize(img, (0, 0), fx=self.viewScale, fy=self.viewScale)
-            
             #dynamically scale image size to window size
-            cv2.imshow("feed", cv2.resize(img, (0, 0), fx=self.windowRes[0]/img.shape[0], fy=self.windowRes[1]/img.shape[1]))
+            cv2.imshow(self.windowTitle, cv2.resize(img, (0, 0), fx=self.windowRes[0]/img.shape[0], fy=self.windowRes[1]/img.shape[1]))
             
             if cv2.waitKey(1) == 27:
                 break  # esc to quit
 
     def Wcallback(self, hwnd, extra):
-        """Gets window size on windoes"""
-        rect = win32gui.GetWindowRect(hwnd)
-        w = rect[2] - rect[0]
-        h = rect[3] - rect[1]
-        self.windowRes=(w,h)
+        """Gets window size on windows"""
+
+        title_text = win32gui.GetWindowText(hwnd)
+        #print(title_text)
+        if title_text==self.windowTitle:
+            rect = win32gui.GetWindowRect(hwnd)
+            w = rect[2] - rect[0]
+            h = rect[3] - rect[1]
+            self.windowRes=(w,h)
+            return False
+        return True
     
     def close(self, E=None):
         """Closes socket and opencv instances"""
-        self.out.release()
+        if self.Write:
+            self.out.release()
         self.s.close()
         if(E!=None):
-            print("Stream closed on Error\n" + E)
+            print("Stream closed on Error\n" + str(E))
         else:
             self.log("Stream closed")
-        cv2.destroyAllWindows()
+        try:
+            cv2.destroyAllWindows()
+        except Exception:
+            pass
+        sys.exit(0)
 
 
 # if you directly run this file it will act run this
 if __name__ == "__main__":
-    client = Client(serverIp="18.111.87.85", port=5000)
+    client = Client(serverIp="localhost", port=5000)
     client.startStream()

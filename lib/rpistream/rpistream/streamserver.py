@@ -7,6 +7,7 @@ from tempfile import TemporaryFile
 import zstandard
 import atexit
 from rpistream.netutils import *
+import sys
 
 
 class Server:
@@ -76,8 +77,8 @@ class Server:
 
     def sendFrame(self, img):
         """Sends single frame with intra-frame compression over an initialized stream"""
-        if img==None:
-            self.close(Exception("sendFrame given null img"))
+        #if img==None:
+        #   self.close(Exception("sendFrame given null img"))
 
         # instanciate temporary bytearray to send later
         Tfile = io.BytesIO()
@@ -123,9 +124,10 @@ class Server:
             self.out.release()
         self.s.close()
         if(E!=None):
-            print("Stream closed on Error\n" + E)
+            print("Stream closed on Error\n" + str(E))
         else:
             self.log("Stream closed")
+        sys.exit(0)
 
 
 # this a helper for the __main__ func
@@ -138,7 +140,7 @@ def retrieveImage(cam, imgResize):
 # runs if you directly run this file
 if __name__ == "__main__":
     cam = rpistream.camera.Camera(mirror=True)
-    resize_cof = 1  # 960p
+    resize_cof = 1  
     server = Server(port=5000)
     server.serve()
     server.startStream(retrieveImage, [cam, resize_cof])

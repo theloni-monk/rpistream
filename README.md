@@ -33,6 +33,7 @@ Server
 ```python
 from rpistream.camera import Camera
 from rpistream.streamserver import Server
+import cv2
 
 def retrieveImage(cam,imgResize):
     image = cv2.resize(cam.image,(0,0),fx=imgResize,fy=imgResize)
@@ -49,6 +50,7 @@ Client
 
 ```python
 from rpistream.streamclient import Client
+import cv2
 
 client = Client(serverIp="localhost", port = 5000) # Connects to the server
 client.startStream() # Starts recieving data and displaying the video
