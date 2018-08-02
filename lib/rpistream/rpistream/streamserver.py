@@ -77,9 +77,10 @@ class Server:
 
     def sendFrame(self, img):
         """Sends single frame with intra-frame compression over an initialized stream"""
-        #if img==None:
-        #   self.close(Exception("sendFrame given null img"))
-
+        try:
+            self.prevFrame
+        except AttributeError:
+            self.initializeStream()
         # instanciate temporary bytearray to send later
         Tfile = io.BytesIO()
         # use numpys built in save function to diff with prevframe
