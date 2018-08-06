@@ -132,7 +132,7 @@ class Server:
         if(E!=None):
             if self.promoteErrors:
                 self.log("Stream encountered error")
-                raise E #TODO:
+                raise E 
             else:
                 print("Stream closed on Error\n" + str(E))
 

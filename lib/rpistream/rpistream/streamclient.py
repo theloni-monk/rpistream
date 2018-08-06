@@ -4,7 +4,7 @@ import io
 import cv2
 import zstandard 
 import atexit
-from rpistream.netutils import *
+from rpistream import *
 import sys
 
 #TODO: add libraries for other GUIs
@@ -177,10 +177,9 @@ class Client:
         if(E!=None):
             if self.promoteErrors:
                 self.log("Stream encountered error")
-                raise E #TODO:
+                raise E
             else:
                 print("Stream closed on Error\n" + str(E))
-
         else:
             self.log("Stream closed")
         

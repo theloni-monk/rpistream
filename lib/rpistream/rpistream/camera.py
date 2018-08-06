@@ -12,7 +12,7 @@ class Camera:
         self.trueRes=(self.cam.get(cv2.CV_CAP_PROP_FRAME_WIDTH),self.cam.get(cv2.CV_VAP_PROP_FRAME_HEIGHT))
         self.scale=(1,1)
         self.outRes=(self.trueRes[0]*self.scale[0],self.trueRes[1]*self.scale[1])
-        
+
         self.output = None
 
     def setRes(self,res):

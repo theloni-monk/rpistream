@@ -60,5 +60,6 @@ client.startStream() # Starts recieving data and displaying the video
 
 ## Dependecies:
 
+- numpy
 - zstandard
-- openCv-python -but pip won't install it so its not listed
+- openCv-python
