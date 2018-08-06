@@ -59,7 +59,7 @@ client.startStream() # Starts recieving data and displaying the video
 
 setuptools.setup(
     name="rpistream",
-    version="0.1.25",
+    version="0.1.26",
     author="Theo Cooper and Ian Huang",
     author_email="theoac2009@outlook.com",
     description="A very simple library built for streaming video from a remote Raspberry Pi server in realtime.",

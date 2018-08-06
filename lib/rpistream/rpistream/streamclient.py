@@ -8,6 +8,7 @@ from rpistream.netutils import *
 import sys
 
 #TODO: add libraries for other GUIs
+#TODO: rewrite gui as a wxPython
 import platform
 if platform.system() == 'Windows':
     import win32gui # only works for windows
@@ -21,6 +22,7 @@ class Client:
     def __init__(self, **kwargs):
         self.os=platform.system()
         self.verbose = kwargs.get("verbose", False)
+        self.promoteErrors=kwargs.get("raiseErrors", False)
         # output file seems to be corrupted: likely due to output file stream not being closed correctly
         self.Write = kwargs.get("WriteFile", False)
         self.writepath = kwargs.get("path", "")
@@ -99,14 +101,14 @@ class Client:
         """Decodes single frame of data from an initialized stream"""
         try:
             r = recv_msg(self.s)  # gets the frame difference
-        except Exception as e:
-            self.close(e)
+        except socket.error as e:
+            self.close(e) #catch socket error
 
         try:
             if len(r) == 0:
                 pass
-        except Exception as e:
-            self.close(Exception("Server sent Null data"))
+        except TypeError as e:
+            self.close(ValueError("Server sent Null data"))
         
 
         # load decompressed image
@@ -151,6 +153,7 @@ class Client:
             cv2.imshow(self.windowTitle, cv2.resize(img, (0, 0), fx=self.windowRes[0]/img.shape[0], fy=self.windowRes[1]/img.shape[1]))
             
             if cv2.waitKey(1) == 27:
+                self.close()
                 break  # esc to quit
 
     def Wcallback(self, hwnd, extra):
@@ -172,14 +175,23 @@ class Client:
             self.out.release()
         self.s.close()
         if(E!=None):
-            print("Stream closed on Error\n" + str(E))
+            if self.promoteErrors:
+                self.log("Stream encountered error")
+                raise E #TODO:
+            else:
+                print("Stream closed on Error\n" + str(E))
+
         else:
             self.log("Stream closed")
+        
         try:
             cv2.destroyAllWindows()
         except Exception:
             pass
-        sys.exit(0)
+
+        if not self.promoteErrors:
+            self.log("Stream encountered error without being set to promote it")
+            sys.exit(0)
 
 
 # if you directly run this file it will act run this
