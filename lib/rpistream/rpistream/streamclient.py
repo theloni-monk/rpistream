@@ -4,45 +4,42 @@ import io
 import cv2
 import zstandard 
 import atexit
-from rpistream import *
+from netutils import *
 import sys
-
-#TODO: add libraries for other GUIs
-#TODO: rewrite gui as a wxPython
 import platform
-if platform.system() == 'Windows':
-    import win32gui # only works for windows
-elif platform.system() == 'Linux':
-    pass
-elif platform.system() == 'Darwin':
-    pass
+
+
 
 
 class Client:
     def __init__(self, **kwargs):
-        self.os=platform.system()
+        #self.os=platform.system()
         self.verbose = kwargs.get("verbose", False)
-        self.promoteErrors=kwargs.get("raiseErrors", False)
+        self.promoteErrors=kwargs.get("promoteErrors", False)
         # output file seems to be corrupted: likely due to output file stream not being closed correctly
-        self.Write = kwargs.get("WriteFile", False)
-        self.writepath = kwargs.get("path", "")
+        self.Write = kwargs.get("writeFile", False)
+        if platform.system() == 'Windows':
+            self.writepath = kwargs.get("path", ".\\")
+        else:
+            self.writepath = kwargs.get("path", "./")
         self.FileFPS = kwargs.get("fileoutFps", 10)
         self.FileName = kwargs.get("fileName", 'outpy')
-        self.iRes = kwargs.get("imageResolution", (640, 480))
+        self.iRes = kwargs.get("imageResolution", (320, 240))
         fourcc = None
         self.out = None
         if self.Write:
             try:
                 fourcc = cv2.cv.CV_FOURCC(*'MJPG') # OpenCV 2 function
             except:
-                fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')  # OpenCV 3 function
+                #fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')  # OpenCV 3 function
+                fourcc = cv2.VideoWriter_fourcc(*'MJPG')
             
             self.out = cv2.VideoWriter(
                 self.writepath+self.FileName+'.avi', fourcc, self.FileFPS, self.iRes)
         
-        self.windowRes = (640, 480)
+        #self.windowRes = (640, 480)
         self.windowTitle=kwargs.get("Title","Feed")
-        self.prevFrame = None
+        self.prevFrame = 0
 
         # creates socket
         self.log("Initializing socket...")
@@ -54,6 +51,7 @@ class Client:
         self.log("Connecting...")
         # connect over port
         self.s.connect((self.ip, kwargs.get("port", 8080)))
+        self.log("Client connected")
 
         # instanciate a decompressor which we can use to decompress our frames
         self.D = zstandard.ZstdDecompressor()
@@ -90,10 +88,11 @@ class Client:
 
     def initializeStream(self):
         """Recvs initial frame and preps"""
-        img = np.zeros((3, 3))  # make blank img
         # initial frame cant use intra-frame compression
+        initMsg = recv_msg(self.s)
+        #print "recieved initial frame"
         self.prevFrame = np.load(io.BytesIO(
-            self.D.decompress(recv_msg(self.s))))
+            self.D.decompress(initMsg)))
         self.frameno = 0
         self.log("stream initialized")
 
@@ -109,7 +108,7 @@ class Client:
                 pass
         except TypeError as e:
             self.close(ValueError("Server sent Null data"))
-        
+
 
         # load decompressed image
                 # np.load creates an array from the serialized data
@@ -131,44 +130,23 @@ class Client:
 
     def startStream(self):
         """Decodes files from stream and displays them"""  
-        self.initializeStream() #decode initial frame 
+        #if self.prevFrame == 0:
+        #    self.initializeStream() #decode initial frame 
         cv2.namedWindow(self.windowTitle, cv2.WINDOW_NORMAL)
 
         while True:
             img=self.decodeFrame() #decode frame
             
-            #TODO: add other OSs
-            if(self.os=="Windows"):
-                #gets the window and calls Wcallback: which gets the window size and sets it as an attribute
-                try:
-                    win32gui.EnumWindows(self.Wcallback, None) 
-                except Exception:
-                    pass
-                
-
             # adjust core resolution: 
             # note: there isn't really a reason for viewScale to ever not be one
             img=cv2.resize(img, (0, 0), fx=self.viewScale, fy=self.viewScale)
             #dynamically scale image size to window size
-            cv2.imshow(self.windowTitle, cv2.resize(img, (0, 0), fx=self.windowRes[0]/img.shape[0], fy=self.windowRes[1]/img.shape[1]))
-            
+            cv2.imshow(self.windowTitle, img) #cv2.resize(img, (0, 0), fx=self.windowRes[0]/img.shape[0], fy=self.windowRes[1]/img.shape[1]))
+
             if cv2.waitKey(1) == 27:
                 self.close()
                 break  # esc to quit
 
-    def Wcallback(self, hwnd, extra):
-        """Gets window size on windows"""
-
-        title_text = win32gui.GetWindowText(hwnd)
-        #print(title_text)
-        if title_text==self.windowTitle:
-            rect = win32gui.GetWindowRect(hwnd)
-            w = rect[2] - rect[0]
-            h = rect[3] - rect[1]
-            self.windowRes=(w,h)
-            return False
-        return True
-    
     def close(self, E=None):
         """Closes socket and opencv instances"""
         if self.Write:
@@ -176,7 +154,7 @@ class Client:
         self.s.close()
         if(E!=None):
             if self.promoteErrors:
-                self.log("Stream encountered error")
+                self.log("Stream raised error: " + str(E))
                 raise E
             else:
                 print("Stream closed on Error\n" + str(E))
@@ -188,9 +166,9 @@ class Client:
         except Exception:
             pass
 
-        if not self.promoteErrors:
-            self.log("Stream encountered error without being set to promote it")
-            sys.exit(0)
+        #if not self.promoteErrors:
+        #    self.log("Stream encountered error without being set to promote it")
+        #    sys.exit(0)
 
 
 # if you directly run this file it will act run this
